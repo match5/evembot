@@ -1,0 +1,54 @@
+{
+    "window_title": "雷电模拟器",
+    "tesseract_path":"C:/Program Files/Tesseract-OCR/tesseract.exe",
+    "ui_sleep_time": 1,
+    "frame_interval": 5,
+    "find_enemy_time": 15,
+    "warp_time": 50,
+    "fight_wait_time": 5,
+    "spot_filter": ["小", "中"],
+    "overview_items_rect": [1060, 80, 1220, 430],
+    "overview_items_offset_y": 70,
+    "overview_types_rect": [1220, 80, 1280, 430],
+    "overview_summery_rect": [900, 200, 970, 420],
+    "status_bar_pos": [650, 650],
+    "status_rects": {
+        "shield": [550, 270, 850, 310],
+        "armour": [550, 316, 850, 356],
+        "structure": [550, 362, 850, 402],
+        "energy": [550, 408, 850, 448]
+    },
+    "equipments": {
+        "rect": [785, 570, 1270, 735],
+        "buttons": [
+            {
+                "idx": 0,
+                "condition": true
+            },
+            {
+                "idx": 1,
+                "condition": true
+            },
+            {
+                "idx": 2,
+                "condition": true
+            },
+            {
+                "idx": 3,
+                "condition": true
+            },
+            {
+                "idx": 4,
+                "condition": "shield<90"
+            },
+            {
+                "idx": 5,
+                "condition": "shield<75"
+            },
+            {
+                "idx": 6,
+                "condition": "energy<80"
+            }
+        ]
+    }
+}

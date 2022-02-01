@@ -1,0 +1,6 @@
+numpy==1.14.5
+opencv-python==4.5.5.62
+Pillow
+pytesseract
+pywin32
+# pyautogui
