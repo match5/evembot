@@ -13,6 +13,7 @@ def init_tesseract(cmd):
     if cmd is not None:
         pytesseract.pytesseract.tesseract_cmd = cmd
 
+
 templates = dict()
 def get_template(name):
     img = templates.get(name)
@@ -21,6 +22,7 @@ def get_template(name):
         templates[name] = img
     # print(name)
     return img
+
 
 def capture_window(hwnd, file_name=None):
     left, top, right, bottom = win32gui.GetWindowRect(hwnd)
@@ -49,12 +51,13 @@ def capture_window(hwnd, file_name=None):
 
     return img
 
+
 def locate_image(image, template, threshold=0):
     image = np.asarray(image)
     template = np.asarray(template)
     template = cv2.cvtColor(template, cv2.COLOR_BGR2RGB)
 
-    w, h = template.shape[:2]
+    h, w = template.shape[:2]
 
     res = cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
@@ -68,8 +71,35 @@ def locate_image(image, template, threshold=0):
 
     return None
 
+
+def locate_image_rect(image, template, threshold=0):
+    image = np.asarray(image)
+    template = np.asarray(template)
+    template = cv2.cvtColor(template, cv2.COLOR_BGR2RGB)
+
+    h, w = template.shape[:2]
+
+    res = cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED)
+    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+    # print (max_val, threshold)
+
+    if max_val > threshold:
+        top_left = max_loc
+        bottom_right = (top_left[0] + w, top_left[1] + h)
+        return (top_left[0], top_left[1], bottom_right[0], bottom_right[1])
+
+    return None
+
+
 def read_image_text(img, box):
     im_crop = img.crop(box)
     im_crop = np.asarray(im_crop)
     text = pytesseract.image_to_string(im_crop, lang='chi_sim', config="--psm 6")
+    return text
+
+
+def read_image_num(img, box):
+    im_crop = img.crop(box)
+    im_crop = np.asarray(im_crop)
+    text = pytesseract.image_to_string(im_crop, lang='eng', config="--psm 6 --oem 3")
     return text

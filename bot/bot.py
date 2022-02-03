@@ -1,4 +1,5 @@
 import re
+import secrets
 import bot.states as states
 from . import detector
 from . import input
@@ -28,6 +29,12 @@ class Bot:
         self.ship_status = {}
         self.status_pattern = re.compile('\s*(\d+)/(\d+).*')
         self.condition_pattern = re.compile('(\w+)(\W+)(\d+)')
+        self.local_players = {
+            'red': 0,
+            'criminal': 0,
+            'white': 0,
+        }
+        self.number_pattern = re.compile('\s*(\d+)\s*')
 
 
     def run(self):
@@ -37,6 +44,7 @@ class Bot:
         while True:
             sleep(frame_interval)
             self.refresh_screen()
+            self.read_local_players()
             self.current_state.update()
 
 
@@ -49,6 +57,7 @@ class Bot:
 
     def refresh_screen(self):
         self.screen = detector.capture_window(self.hwnd)
+        # self.screen = Image.open('test1.png')
 
 
     def refresh_ship_status(self):
@@ -81,12 +90,12 @@ class Bot:
         return False
 
 
-    def read_overview_items(self):
+    def read_overview_items(self, count=5):
         item_offset = self.cfg['overview_items_offset_y']
         overview_rect = tuple(self.cfg['overview_items_rect'])
         screen = self.screen
         items = []
-        for i in range(5):
+        for i in range(count):
             rect = (overview_rect[0], overview_rect[1] + item_offset * i, overview_rect[2], overview_rect[1] + item_offset * (i + 1))
             txt = detector.read_image_text(screen, rect)
             print(txt)
@@ -131,6 +140,33 @@ class Bot:
         print(self.ship_status)
 
 
+    def read_local_players(self):
+        screen = self.screen
+        img = detector.get_template('local_window')
+        rect = detector.locate_image_rect(screen, img, 0.8)
+        if rect is not None:
+            rect = (rect[0], rect[1] + 300, rect[2], rect[3] + 300)
+            local = screen.crop(rect)
+            lp = {}
+            for key in self.local_players.keys():
+                rect = self.cfg['local_player_rects'].get(key)
+                if rect is not None:
+                    txt = detector.read_image_num(local, rect)
+                    match = self.number_pattern.match(txt)
+                    if match is not None:
+                        lp[key] = int(match.group(1))
+            self.local_players.update(lp)
+
+
+    def check_avoid_players(self):
+        avoid_players = self.cfg.get('avoid_players', dict)
+        for key, num in self.local_players.items():
+            if num > 0 and avoid_players.get(key, False):
+                print(self.local_players)
+                return True
+        return False
+
+
     def check_condition(self, condition):
         if isinstance(condition, str):
             match = self.condition_pattern.match(condition)
@@ -146,3 +182,15 @@ class Bot:
 
     def click_blank(self):
         input.mouse_click_left(self.hwnd, 10, 600)
+
+
+    def active_equipments(self):
+        buttons = self.cfg['equipments']['buttons']
+        for i, btn in enumerate(buttons):
+            is_active = self.check_equip_button(btn['idx'])
+            rt = self.check_condition(btn.get('condition'))
+            print('equip %d' % i, rt)
+            if is_active != rt:
+                pos = self.get_equip_button_position(i)
+                input.mouse_click_left(self.hwnd, pos[0], pos[1])
+                sleep(self.cfg.get('ui_sleep_time', float))

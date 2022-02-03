@@ -35,6 +35,9 @@ class FindEnemy(BotState):
 
 
     def update(self):
+        if self.bot.check_avoid_players():
+            self.bot.change_state(Escape)
+            return
         if self.bot.check_enemy():
             self.bot.change_state(Fight)
         elif now() > self.exit_time:
@@ -100,7 +103,9 @@ class Fight(BotState):
 
 
     def update(self):
-        
+        if self.bot.check_avoid_players():
+            self.bot.change_state(Escape)
+            return
         if not self.lock_on_all() and not self.bot.check_enemy():
             if self.exit_time is None:
                 self.exit_time = self.bot.cfg.get('fight_wait_time', float) + now()
@@ -111,7 +116,7 @@ class Fight(BotState):
                 self.bot.change_state(FindEnemy)
                 return
         self.bot.refresh_ship_status()
-        self.active_equipments()
+        self.bot.active_equipments()
 
 
     def lock_on_all(self):
@@ -127,18 +132,50 @@ class Fight(BotState):
         return False
 
 
-    def active_equipments(self):
-        buttons = self.bot.cfg['equipments']['buttons']
-        for i, btn in enumerate(buttons):
-            is_active = self.bot.check_equip_button(btn['idx'])
-            rt = self.bot.check_condition(btn.get('condition'))
-            print('equip %d' % i, rt)
-            if is_active != rt:
-                pos = self.bot.get_equip_button_position(i)
-                input.mouse_click_left(self.bot.hwnd, pos[0], pos[1])
+
+
+
+class Escape(BotState):
+
+
+    def __init__(self, bot):
+        super().__init__(bot)
+        self.exit_time = None
+
+
+    def enter(self):
+        super().enter()
+        if self.warp_to_station():
+            self.exit_time = self.bot.cfg.get('escape_wait_time', float) + now()
+
+
+    def update(self):
+        if self.exit_time and now() > self.exit_time:
+            self.bot.change_state(FindEnemy)
+            return
+        if self.exit_time is None:
+            if self.warp_to_station():
+                self.exit_time = self.bot.cfg.get('escape_wait_time', float) + now()
+        if self.bot.check_avoid_players():
+            self.exit_time = self.bot.cfg.get('escape_wait_time', float) + now()
+        self.bot.refresh_ship_status()
+        self.bot.active_equipments()
+
+
+    def warp_to_station(self):
+        if self.bot.switch_overview('station') or self.bot.switch_overview('fortress'):
+            self.bot.refresh_screen()
+            items = self.bot.read_overview_items(1)
+            if items:
+                it = items[0]
+                input.mouse_click_left(self.bot.hwnd, it[1][0], it[1][1])
                 sleep(self.bot.cfg.get('ui_sleep_time', float))
-
-
-
-
-
+                pos = detector.locate_image(
+                    detector.capture_window(self.bot.hwnd),
+                    detector.get_template('btn_warp'),
+                    0.8
+                )
+                if pos is not None:
+                    input.mouse_click_left(self.bot.hwnd, pos[0], pos[1])
+                    return True
+        return False
