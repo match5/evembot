@@ -1,7 +1,7 @@
 {
     "window_title": "雷电模拟器",
     "tesseract_path":"C:/Program Files/Tesseract-OCR/tesseract.exe",
-    "ui_sleep_time": 1,
+    "ui_sleep_time": 0.75,
     "frame_interval": 5,
     "find_enemy_time": 15,
     "warp_time": 50,
@@ -29,19 +29,31 @@
         "buttons": [
             {
                 "idx": 0,
-                "condition": true
+                "condition": true,
+                "available_states": {
+                    "Fight": true
+                }
             },
             {
                 "idx": 1,
-                "condition": true
+                "condition": true,
+                "available_states": {
+                    "Fight": true
+                }
             },
             {
                 "idx": 2,
-                "condition": true
+                "condition": true,
+                "available_states": {
+                    "Fight": true
+                }
             },
             {
                 "idx": 3,
-                "condition": true
+                "condition": true,
+                "available_states": {
+                    "Fight": true
+                }
             },
             {
                 "idx": 4,
@@ -49,11 +61,21 @@
             },
             {
                 "idx": 5,
-                "condition": "energy<75"
+                "condition": "shield<85"
             },
             {
                 "idx": 6,
-                "condition": "shield<95"
+                "condition": "energy<80",
+                "available_states": {
+                    "Fight": true
+                }
+            },
+            {
+                "idx": 7,
+                "condition": true,
+                "available_states": {
+                    "Escape": true
+                }
             }
         ]
     },
@@ -61,5 +83,6 @@
         "red": true,
         "criminal": true,
         "white": true
-    }
+    },
+    "escape_condition": "shield<30"
 }

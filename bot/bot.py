@@ -1,5 +1,4 @@
 import re
-import secrets
 import bot.states as states
 from . import detector
 from . import input
@@ -39,13 +38,15 @@ class Bot:
 
     def run(self):
         frame_interval = self.cfg.get('frame_interval', float)
-
         self.change_state(states.FindEnemy)
         while True:
             sleep(frame_interval)
             self.refresh_screen()
             self.read_local_players()
-            self.current_state.update()
+            try:
+                self.current_state.update()
+            except Exception as e:
+                print(e)
 
 
     def change_state(self, cls):
@@ -63,9 +64,13 @@ class Bot:
     def refresh_ship_status(self):
         pos = self.cfg['status_bar_pos']
         input.mouse_click_left(self.hwnd, pos[0], pos[1], 1)
-        self.screen = detector.capture_window(self.hwnd)
+        self.status_screen = detector.capture_window(self.hwnd)
         self.click_blank()
         self.read_ship_status()
+        if self.check_condition(self.cfg.get('escape_condition')):
+            if not isinstance(self.current_state, states.Escape):
+                self.change_state(states.Escape)
+                raise Exception('escape_condition is True')
 
 
     def check_enemy(self):
@@ -105,7 +110,7 @@ class Bot:
 
     def check_equip_button(self, idx):
         button = self.screen.crop(self.get_equip_button_rect(idx))
-        # button.save("btn%d.png" % idx)
+        # button.save('btn%d.png' % idx)
         img = detector.get_template('check_equip_active')
         pos = detector.locate_image(button, img, 0.95)
         return pos is not None
@@ -128,10 +133,10 @@ class Bot:
 
 
     def read_ship_status(self):
-        screen = self.screen
-        status_rects = self.cfg["status_rects"]
+        status_screen = self.status_screen
+        status_rects = self.cfg['status_rects']
         for key, rect in status_rects.items():
-            txt = detector.read_image_text(screen, rect)
+            txt = detector.read_image_text(status_screen, rect)
             txt = txt.replace(',', '')
             txt = txt.replace('.', '')
             match = self.status_pattern.match(txt)
@@ -187,9 +192,12 @@ class Bot:
     def active_equipments(self):
         buttons = self.cfg['equipments']['buttons']
         for i, btn in enumerate(buttons):
+            available_states = btn.get('available_states')
+            if available_states and not available_states.get(self.current_state.__class__.__name__, False):
+                continue
             is_active = self.check_equip_button(btn['idx'])
             rt = self.check_condition(btn.get('condition'))
-            print('equip %d' % i, rt)
+            print('equip %d' % btn['idx'], is_active, rt)
             if is_active != rt:
                 pos = self.get_equip_button_position(i)
                 input.mouse_click_left(self.hwnd, pos[0], pos[1])

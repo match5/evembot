@@ -39,7 +39,7 @@ def capture_window(hwnd, file_name=None):
 
     info = bmp.GetInfo()
     bits = bmp.GetBitmapBits(True)
-    img = Image.frombuffer("RGB", (info['bmWidth'], info['bmHeight']), bits, 'raw', 'BGRX', 0, 1)
+    img = Image.frombuffer('RGB', (info['bmWidth'], info['bmHeight']), bits, 'raw', 'BGRX', 0, 1)
 
     win32gui.DeleteObject(bmp.GetHandle())
     dc.DeleteDC()
@@ -93,13 +93,15 @@ def locate_image_rect(image, template, threshold=0):
 
 def read_image_text(img, box):
     im_crop = img.crop(box)
+    # im_crop.save('txt_%d_%d.png' % (int(box[0]), int(box[1])))
     im_crop = np.asarray(im_crop)
-    text = pytesseract.image_to_string(im_crop, lang='chi_sim', config="--psm 6")
+    text = pytesseract.image_to_string(im_crop, lang='chi_sim', config='--psm 6 --oem 3')
     return text
 
 
 def read_image_num(img, box):
     im_crop = img.crop(box)
+    # im_crop.save('num_%d_%d.png' % (int(box[0]), int(box[1])))
     im_crop = np.asarray(im_crop)
-    text = pytesseract.image_to_string(im_crop, lang='eng', config="--psm 6 --oem 3")
+    text = pytesseract.image_to_string(im_crop, lang='eng', config='--psm 6 --oem 3')
     return text
