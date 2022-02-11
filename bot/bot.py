@@ -196,7 +196,7 @@ class Bot:
             if available_states and not available_states.get(self.current_state.__class__.__name__, False):
                 continue
             is_active = self.check_equip_button(btn['idx'])
-            rt = self.check_condition(btn.get('condition'))
+            rt = self.check_condition(btn.get('condition', True))
             print('equip %d' % btn['idx'], is_active, rt)
             if is_active != rt:
                 pos = self.get_equip_button_position(i)
