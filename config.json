@@ -13,9 +13,14 @@
         "energy": [550, 408, 850, 448]
     },
     "local_player_rects": {
-        "red": [26, 19, 66, 39],
-        "criminal": [108, 19, 148, 39],
-        "white": [191, 19, 231, 39]
+        "red": [0, 9, 86, 49],
+        "criminal": [82, 9, 168, 49],
+        "white": [165, 9, 251, 49]
+    },
+    "local_player_check_thresholds": {
+        "red": 0.4,
+        "criminal": 0.4,
+        "white": 0.9
     },
     "ui_sleep_time": 0.75,
     "frame_interval": 5,
