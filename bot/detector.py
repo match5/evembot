@@ -7,6 +7,8 @@ import cv2
 import numpy as np
 
 from PIL import Image
+import ddddocr
+ocr = ddddocr.DdddOcr(show_ad=False)
 
 def init_tesseract(cmd):
     print('init tesseract %s' % cmd)
@@ -93,7 +95,7 @@ def locate_image_rect(image, template, threshold=0):
 
 def read_image_text(img, box):
     im_crop = img.crop(box)
-    # im_crop.save('txt_%d_%d.png' % (int(box[0]), int(box[1])))
+    # name = 'temp/num_%d_%d_%d_%d.png' % (int(box[0]), int(box[1]), int(box[2]), int(box[3]))
     im_crop = np.asarray(im_crop)
     text = pytesseract.image_to_string(im_crop, lang='chi_sim', config='--psm 6 --oem 3')
     return text
@@ -101,7 +103,9 @@ def read_image_text(img, box):
 
 def read_image_num(img, box):
     im_crop = img.crop(box)
-    # im_crop.save('num_%d_%d.png' % (int(box[0]), int(box[1])))
-    im_crop = np.asarray(im_crop)
-    text = pytesseract.image_to_string(im_crop, lang='eng', config='--psm 6 --oem 3')
+    name = 'temp/num_%d_%d_%d_%d.png' % (int(box[0]), int(box[1]), int(box[2]), int(box[3]))
+    im_crop.save(name)
+    text = ''
+    with open(name, 'rb') as f:
+        text = ocr.classification(f.read())
     return text

@@ -153,15 +153,13 @@ class Bot:
             rect = (rect[0], rect[1] + 300, rect[2], rect[3] + 300)
             local = screen.crop(rect)
             lp = {}
-            thresholds = self.cfg['local_player_check_thresholds']
             for key in self.local_players.keys():
-                temp = detector.get_template('check_local_' + key)
                 rect = self.cfg['local_player_rects'].get(key)
-                img = local.crop(rect)
-                if detector.locate_image(img, temp, thresholds.get(key, 0.6)) is not None:
-                    lp[key] = 0
-                else:
-                    lp[key] = 1
+                if rect is not None:
+                    txt = detector.read_image_num(local, rect)
+                    match = self.number_pattern.match(txt)
+                    if match is not None:
+                        lp[key] = int(match.group(1))
             self.local_players.update(lp)
 
 

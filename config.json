@@ -13,9 +13,9 @@
         "energy": [550, 408, 850, 448]
     },
     "local_player_rects": {
-        "red": [0, 9, 86, 49],
-        "criminal": [82, 9, 168, 49],
-        "white": [165, 9, 251, 49]
+        "red": [26, 19, 66, 39],
+        "criminal": [108, 19, 148, 39],
+        "white": [191, 19, 231, 39]
     },
     "local_player_check_thresholds": {
         "red": 0.4,
@@ -27,8 +27,8 @@
     "find_enemy_time": 15,
     "warp_time": 50,
     "fight_wait_time": 5,
-    "escape_wait_time" : 120,
-    "spot_filter": ["小", "中"],
+    "escape_wait_time" : 60,
+    "spot_filter": ["小", "中", "大"],
     "equipments": {
         "rect": [785, 570, 1270, 735],
         "buttons": [
