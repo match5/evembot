@@ -1,5 +1,7 @@
 import re
-import bot.states as states
+
+from .. app import App
+from . import states as states
 from . import detector
 from . import input
 
@@ -7,8 +9,9 @@ from PIL import Image
 from time import sleep
 import win32gui
 
-class Bot:
+class Bot(App):
 
+    Name = "Bot"
 
     op_map = {
         '<': lambda a, b: a < b,
@@ -18,47 +21,39 @@ class Bot:
     }
 
 
-    def __init__(self, cfg):
-        self.cfg = cfg
-        print ('find window %s' % cfg['window_title'])
-        self.hwnd = win32gui.FindWindow(None, cfg['window_title'])
-        print('hwnd %d' % self.hwnd)
+    def __init__(self, cfg, hwnd):
+        super().__init__(cfg, hwnd)
         detector.init_tesseract(cfg.get('tesseract_path'))
-        self.current_state = None
         self.ship_status = {}
         self.status_pattern = re.compile('\s*(\d+)/(\d+).*')
         self.condition_pattern = re.compile('(\w+)(\W+)(\d+)')
+        self.number_pattern = re.compile('\s*(\d+)\s*')
         self.local_players = {
             'red': 0,
             'criminal': 0,
             'white': 0,
         }
-        self.number_pattern = re.compile('\s*(\d+)\s*')
 
 
-    def run(self):
-        frame_interval = self.cfg.get('frame_interval', float)
+    def start(self):
+        super().start()
         self.change_state(states.FindEnemy)
-        while True:
-            sleep(frame_interval)
-            self.refresh_screen()
-            self.read_local_players()
-            try:
+
+
+    def tick(self):
+        super().tick()
+        self.refresh_screen()
+        self.read_local_players()
+        try:
+            if self.current_state is not None:
                 self.current_state.update()
-            except Exception as e:
-                print(e)
+        except Exception as e:
+            print(e)
 
-
-    def change_state(self, cls):
-        if self.current_state is not None:
-            self.current_state.exit()
-        self.current_state = cls(self)
-        self.current_state.enter()
-        
 
     def refresh_screen(self):
-        self.screen = detector.capture_window(self.hwnd)
-        # self.screen = Image.open('test1.png')
+        self.screen = detector.capture_window(self.hwnd, f"screen_{self.hwnd}.png")
+        # self.screen = Image.open(f"screen_{self.hwnd}.png")
 
 
     def refresh_ship_status(self):

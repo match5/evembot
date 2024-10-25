@@ -1,5 +1,16 @@
 {
-    "window_title": "雷电模拟器",
+    "window_titles": [
+        "雷电模拟器",
+        "雷电模拟器-1",
+        "雷电模拟器-2",
+        "雷电模拟器-3",
+        "雷电模拟器-4",
+        "雷电模拟器-5",
+        "雷电模拟器-6",
+        "雷电模拟器-7",
+        "雷电模拟器-8",
+        "雷电模拟器-9"
+    ],
     "tesseract_path":"C:/Program Files/Tesseract-OCR/tesseract.exe",
     "overview_items_rect": [1060, 80, 1220, 430],
     "overview_items_offset_y": 70,
